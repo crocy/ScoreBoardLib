@@ -13,35 +13,18 @@ public class Match {
     this.away = away;
   }
 
-  public Team getHome() {
-    return home;
-  }
-
-  public Team getAway() {
-    return away;
-  }
-
-  public int getScoreHome() {
-    return scoreHome;
-  }
-
-  public void setScoreHome(int scoreHome) {
-    this.scoreHome = scoreHome;
-  }
-
-  public int getScoreAway() {
-    return scoreAway;
-  }
-
-  public void setScoreAway(int scoreAway) {
-    this.scoreAway = scoreAway;
-  }
-
   public int getScore(Team team) {
     if (team == null) throw new IllegalArgumentException("Team cannot be null");
-    if (team == home) return scoreHome;
-    if (team == away) return scoreAway;
+    else if (team == home) return scoreHome;
+    else if (team == away) return scoreAway;
+    else throw new IllegalArgumentException("Team %s not in this match".formatted(team));
+  }
 
-    throw new IllegalArgumentException("Team %s not in this match".formatted(team));
+  public void updateScore(Team team, int score) {
+    if (score < 0) throw new IllegalArgumentException("Score cannot be negative: %s".formatted(score));
+    if (team == null) throw new IllegalArgumentException("Team cannot be null");
+    else if (team == home) scoreHome = score;
+    else if (team == away) scoreAway = score;
+    else throw new IllegalArgumentException("Team %s not in this match".formatted(team));
   }
 }
