@@ -8,6 +8,10 @@ public class ScoreBoard {
   private final Map<Team, Match> matches = new HashMap<>();
 
   public Match startNewMatch(Team home, Team away) {
+    if (home == null) throw new IllegalArgumentException("Home team cannot be null");
+    if (away == null) throw new IllegalArgumentException("Away team cannot be null");
+    if (home == away) throw new IllegalArgumentException("Home and Away teams cannot be the same");
+
     if (matches.containsKey(home))
       throw new IllegalStateException("Home team %s is already in a match".formatted(home));
     if (matches.containsKey(away))
@@ -21,10 +25,16 @@ public class ScoreBoard {
   }
 
   public int getScore(Team team) {
+    if (team == null) throw new IllegalArgumentException("Team cannot be null");
+    if (!matches.containsKey(team)) throw new IllegalArgumentException("Team %s not in a match".formatted(team));
+
     return matches.get(team).getScore(team);
   }
 
   public void updateScore(Team team, int score) {
+    if (team == null) throw new IllegalArgumentException("Team cannot be null");
+    if (!matches.containsKey(team)) throw new IllegalArgumentException("Team %s not in a match".formatted(team));
+
     matches.get(team).updateScore(team, score);
   }
 
