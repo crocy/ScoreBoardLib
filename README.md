@@ -33,6 +33,9 @@ such issues were to be addressed, we could make the `ScoreBoard.startNewMatch()`
 `synchronized` method, or use a `synchronized(matches) { ... }` block inside those methods to prevent concurrent
 modification of the `matches` object.
 
+`Collections.synchronizedMap()` or `ConcurrentHashMap` would be another solution but the map data would need to be
+structured differently.
+
 ## "Outside" data comes in a form of a Team (and maybe a score)
 
 We assume that whoever is going to interact with this lib will have access to all the Teams objects and will pass those
@@ -40,7 +43,20 @@ instead of some team IDs (like integers or string IDs). That means that when you
 just pass that team and its score to the `ScoreBoard.updateScore()` method and it finds the right match and updates the
 appropriate (home or away team's) score.
 
-## Score not part of Team
+## Score not part of a Team (class/object)
 
 Score isn't part of the Team object since it depends on the current match and isn't really a characteristic of a team.
 That means we have to link the team's and its current match score in some other way.
+
+## Update/set score
+
+Update score was treated as a score to update or set to, not to add to the previous score. Meaning calling
+`updateScore(team, 3)` will set that team's score to 3 for the current match. If you later call `updateScore(team, 2)`
+method (for the same team and match), the score won't be updated to `previousScore + 2`, but rather to just 2 (actually
+deducting 1 score from the previous score).
+
+# Possible improvements
+
+## Logging
+
+More extensive logging with a proper logging lib (like Log4J) could be used.
