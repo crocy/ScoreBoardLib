@@ -15,6 +15,19 @@ The scoreboard supports the following operations:
 4. Get a summary of matches in progress ordered by their total score. The matches with the same total score will be
    returned ordered by the most recently started match in the scoreboard.
 
+# How to run
+
+## Using IntelliJ IDEA
+
+The easies way to run this project is to import it (as a Gradle project) into IntelliJ IDEA and run the ScoreBoardTest.
+
+## Via terminal
+
+Go to the root of this project and run
+```./gradlew test```
+or
+```./gradlew :test --tests "com.sr.ScoreBoardTest"```
+
 # Assumptions
 
 Some assumptions were made when writing this example library.
@@ -60,3 +73,14 @@ deducting 1 score from the previous score).
 ## Logging
 
 More extensive logging with a proper logging lib (like Log4J) could be used.
+
+## Concurrency
+
+Concurrency issues could be addressed and improved.
+
+## ScoreBoard.java
+
+The ScoreBoard data structure could be altered so that we wouldn't need both a list and a map of matches. A linked hash
+map wouldn't really solve the problem since each team (as a key) has its own match (as a value) duplicating the number
+of matches in the map and so making it harder for us to iterate over the linked hash map just to get the list of
+matches.
