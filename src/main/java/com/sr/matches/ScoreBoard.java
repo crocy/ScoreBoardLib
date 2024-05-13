@@ -80,9 +80,4 @@ public class ScoreBoard {
         .toArray(Match[]::new);
   }
 
-  // helper method
-  public void printMatches() {
-    System.out.println("Matches:");
-    matches.forEach(System.out::println);
-  }
 }

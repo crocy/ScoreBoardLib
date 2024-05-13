@@ -18,7 +18,7 @@ public class ScoreBoardTest {
     ScoreBoard scoreBoard = new ScoreBoard();
     Match match = scoreBoard.startNewMatch(home, away);
 
-    assertNotNull(match);
+    assertNotNull(match, "can't start a match with team %s and %s".formatted(home, away));
     assertEquals(0, scoreBoard.getScore(home));
     assertEquals(0, scoreBoard.getScore(away));
 
@@ -34,24 +34,24 @@ public class ScoreBoardTest {
     assertEquals(3, scoreBoard.getScore(home));
     assertEquals(0, scoreBoard.getScore(away));
 
-    // shouldn't be possible to update score with null or negative value
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(null, 1));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(home, -1));
+    assertAll("shouldn't be possible to update score with null or negative value",
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(null, 1)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(home, -1)));
 
     Match finishedMatch = scoreBoard.finishMatch(home, away);
-    assertNotNull(finishedMatch);
-    assertEquals(match, finishedMatch);
+    assertNotNull(finishedMatch, "can't finish match: %s".formatted(finishedMatch));
+    assertEquals(match, finishedMatch, "match %s and %s not equal".formatted(match, finishedMatch));
 
-    // shouldn't be possible to update score after match is finished
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(home, 2));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(away, 1));
+    assertAll("shouldn't be possible to update score after match is finished",
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(home, 2)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.updateScore(away, 1)));
 
-    // shouldn't be possible to get score after match is finished
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(home));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(away));
+    assertAll("shouldn't be possible to get score after match is finished",
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(home)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(away)));
 
-    // shouldn't be possible to finish the same match twice
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(home, away));
+    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(home, away),
+        "shouldn't be possible to finish the same match twice");
   }
 
   @Test
@@ -60,28 +60,29 @@ public class ScoreBoardTest {
     Team away = new Team("Away");
     ScoreBoard scoreBoard = new ScoreBoard();
 
-    // start new match with bad data: home or away team is null or home and away team are same
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.startNewMatch(home, null));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.startNewMatch(null, away));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.startNewMatch(home, home));
+    assertAll(
+        "shouldn't be possible to start a new match with bad data: home or away team is null or home and away team are same",
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.startNewMatch(home, null)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.startNewMatch(null, away)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.startNewMatch(home, home)));
 
-    // get score with bad data: team is null or not in a match
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(null));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(home));
+    assertAll("shouldn't be possible to get score with bad data: team is null or not in a match",
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(null)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.getScore(home)));
 
-    // finish match with bad data: home or away team is null or home and away team are same
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(home, null));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(null, away));
-    assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(home, home));
+    assertAll(
+        "shouldn't be possible to finish match with bad data: home or away team is null or home and away team are same",
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(home, null)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(null, away)),
+        () -> assertThrowsExactly(IllegalArgumentException.class, () -> scoreBoard.finishMatch(home, home)));
 
-    // test starting a match with a team that is already in a match
     Match match = scoreBoard.startNewMatch(home, away);
-    assertNotNull(match);
-    assertThrowsExactly(IllegalStateException.class, () -> scoreBoard.startNewMatch(away, home));
-
-    // shouldn't be possible to start a match with a team that is already in a match
     Team other = new Team("Other");
-    assertThrowsExactly(IllegalStateException.class, () -> scoreBoard.startNewMatch(other, away));
+
+    assertNotNull(match, "can't start a match with team %s and %s".formatted(home, away));
+    assertAll("shouldn't be possible to start a match with a team that is already in a match",
+        () -> assertThrowsExactly(IllegalStateException.class, () -> scoreBoard.startNewMatch(home, other)),
+        () -> assertThrowsExactly(IllegalStateException.class, () -> scoreBoard.startNewMatch(other, away)));
 
     assertAll("shouldn't be possible to get or update score with a team that is not in this match (or is null)",
         () -> assertThrowsExactly(IllegalArgumentException.class, () -> match.updateScore(other, 1)),
@@ -92,7 +93,7 @@ public class ScoreBoardTest {
 
   @Test
   public void getMatchesSummary() {
-    int numOfMatches = 10;
+    int numOfMatches = 20;
     Match[] matches = new Match[numOfMatches];
     ScoreBoard scoreBoard = new ScoreBoard();
 
@@ -108,14 +109,19 @@ public class ScoreBoardTest {
       // ordering later on)
       scoreBoard.updateScore(home, i % 3);
       scoreBoard.updateScore(away, i % 3);
+      assertEquals(i % 3, scoreBoard.getScore(home));
+      assertEquals(i % 3, scoreBoard.getScore(away));
     }
 
-    scoreBoard.printMatches();
+    System.out.println("Matches:");
+    Arrays.stream(matches).forEach(System.out::println);
+
     Match[] matchesSummary = scoreBoard.getMatchesSummary();
 
     // check that all matches are in the summary
     for (Match match : matches) {
-      assertTrue(Arrays.stream(matchesSummary).anyMatch(m -> m.equals(match)));
+      assertTrue(Arrays.stream(matchesSummary).anyMatch(m -> m.equals(match)),
+          "matches and matchesSummary don't contain all the same elements");
     }
 
     System.out.println("Sorted matches:");
@@ -136,16 +142,17 @@ public class ScoreBoardTest {
       }
     }
 
-    // shouldn't be possible to finish a match where both teams are not in the same match
     assertThrowsExactly(IllegalArgumentException.class,
-        () -> scoreBoard.finishMatch(matches[0].getHomeTeam(), matches[numOfMatches - 1].getAwayTeam()));
+        () -> scoreBoard.finishMatch(matches[0].getHomeTeam(), matches[numOfMatches - 1].getAwayTeam()),
+        "shouldn't be possible to finish a match where both teams are not in the same match");
 
     // finish all matches
     for (Match match : matchesSummary) {
-      assertNotNull(scoreBoard.finishMatch(match.getHomeTeam(), match.getAwayTeam()));
+      assertNotNull(scoreBoard.finishMatch(match.getHomeTeam(), match.getAwayTeam()),
+          "can't finish match: %s".formatted(match));
     }
 
-    // shouldn't be possible to get a matches summary if there are no active matches
-    assertThrowsExactly(IllegalStateException.class, scoreBoard::getMatchesSummary);
+    assertThrowsExactly(IllegalStateException.class, scoreBoard::getMatchesSummary,
+        "shouldn't be possible to get a matches summary if there are no active matches");
   }
 }
